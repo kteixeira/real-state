@@ -70,6 +70,10 @@ class LoginController extends Controller
         return $this->sendFailedLoginResponse($request);
     }
 
+    /**
+     * @param $request
+     * @return \Illuminate\Session\SessionManager|\Illuminate\Session\Store|mixed
+     */
     private function getApiCredentials($request)
     {
         $http = new GuzzleHttp\Client();
