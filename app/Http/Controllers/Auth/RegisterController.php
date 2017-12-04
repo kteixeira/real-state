@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Auth;
 
 use App\User;
 use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Foundation\Auth\RegistersUsers;
+use GuzzleHttp;
 
 class RegisterController extends Controller
 {
@@ -66,5 +68,61 @@ class RegisterController extends Controller
             'email' => $data['email'],
             'password' => bcrypt($data['password']),
         ]);
+    }
+
+    /**
+     * The user has been registered.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  mixed  $user
+     * @return mixed
+     */
+    protected function registered(Request $request, $user)
+    {
+        $this->getApiCredentials($request);
+    }
+
+    /**
+     * @param $request
+     * @return \Illuminate\Session\SessionManager|\Illuminate\Session\Store|mixed
+     */
+    private function getApiCredentials($request)
+    {
+        $http = new GuzzleHttp\Client();
+        $credentials = $this->credentials($request);
+
+        $response = $http->post('http://localhost:8000/oauth/token', [
+            'form_params' => [
+                'grant_type' => 'password',
+                'client_id' => '3',
+                'client_secret' => 'T2cjJbEREjg1Y3BIYa4ASyGAmEnTcu6lgvtvhfjA',
+                'username' => $credentials['email'],
+                'password' => $credentials['password'],
+                'scope' => '',
+            ]
+        ]);
+
+        return session(['api_credentials' => json_decode((string) $response->getBody(), true)]);
+    }
+
+    /**
+     * Get the needed authorization credentials from the request.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return array
+     */
+    protected function credentials(Request $request)
+    {
+        return $request->only($this->username(), 'password');
+    }
+
+    /**
+     * Get the login username to be used by the controller.
+     *
+     * @return string
+     */
+    public function username()
+    {
+        return 'email';
     }
 }

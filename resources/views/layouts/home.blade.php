@@ -32,11 +32,11 @@
                     <a class="nav-link" href="/home/properties">Propriedades</a>
                 </li>
                 <li>
-                    <a class="btn col-2 float-right" href="{{ url('/logout') }}"
+                    <a class="btn col-10 float-right" href="{{ url('/logout') }}"
                        onclick="event.preventDefault();document.getElementById('logout-form').submit();">
                         Logout
                     </a>
-                    <form id="form-inline my-2 my-lg-0"
+                    <form id="logout-form"
                           action="{{ url('/logout') }}"
                           method="POST"
                           style="display: none;">

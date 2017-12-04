@@ -74,7 +74,6 @@ class LoginController extends Controller
     {
         $http = new GuzzleHttp\Client();
         $credentials = $this->credentials($request);
-
         $response = $http->post('http://localhost:8000/oauth/token', [
             'form_params' => [
                 'grant_type' => 'password',
