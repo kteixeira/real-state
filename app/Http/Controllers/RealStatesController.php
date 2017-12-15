@@ -5,26 +5,23 @@ namespace App\Http\Controllers;
 use App\Http\Requests\RealStateRequestCreate;
 use App\Http\Requests\RealStateRequestUpdate;
 use App\RealState;
-use GuzzleHttp;
+use App\Services\RealState as RealStateService;
 
 class RealStatesController extends Controller
 {
+    private $realStateService;
+
+    public function __construct()
+    {
+        $this->realStateService = new RealStateService();
+    }
+
     /**
      * @return mixed
      */
     public function index()
     {
-        $http = new GuzzleHttp\Client;
-        $apiCredentials = session('api_credentials');
-
-        $response = $http->request('GET', 'http://localhost:8000/api/real_states', [
-            'headers' => [
-                'Accept' => 'application/json',
-                'Authorization' => $apiCredentials['token_type'] . ' ' . $apiCredentials['access_token']
-            ]
-        ]);
-
-        return json_decode((string) $response->getBody(), true);
+        return $this->realStateService->getRealStates();
     }
 
     /**
@@ -32,76 +29,26 @@ class RealStatesController extends Controller
      */
     public function getFormatted()
     {
-        $http = new GuzzleHttp\Client;
-        $apiCredentials = session('api_credentials');
-
-        $response = $http->request('GET', 'http://localhost:8000/api/real_states', [
-            'headers' => [
-                'Accept' => 'application/json',
-                'Authorization' => $apiCredentials['token_type'] . ' ' . $apiCredentials['access_token']
-            ]
-        ]);
-
-        $realStates = json_decode((string) $response->getBody(), true);
-
-        if(!isset($realStates['data']) || count($realStates['data']) == 0){
-            response('Erro ao buscar imobiliárias formatadas', 400);
-        }
-
-        $return = [];
-
-        foreach ($realStates['data'] as $data) {
-            $return[$data['id']] = $data['name'];
-        }
-
-        return response($return, 200);
+        return $this->realStateService->getFormattedRealStates();
     }
 
     /**
-     * @param RealStateRequestCreate $realState
+     * @param RealStateRequestCreate $realStateRequest
      * @return mixed
      */
-    public function store(RealStateRequestCreate $realState)
+    public function store(RealStateRequestCreate $realStateRequest)
     {
-        $http = new GuzzleHttp\Client;
-        $apiCredentials = session('api_credentials');
-
-        $response = $http->post('http://localhost:8000/api/real_states', [
-            'headers' => [
-                'Accept' => 'application/json',
-                'Authorization' => $apiCredentials['token_type'] . ' ' . $apiCredentials['access_token']
-            ],
-            'form_params' => [
-                'name' => $realState->name,
-                'description' => $realState->description
-            ],
-        ]);
-
-        return json_decode((string) $response->getBody(), true);
+        return $this->realStateService->postRealState($realStateRequest);
     }
 
     /**
-     * @param RealStateRequestUpdate $request
+     * @param RealStateRequestUpdate $realStateRequest
      * @param RealState $realState
      * @return mixed
      */
-    public function update(RealStateRequestUpdate $request, RealState $realState)
+    public function update(RealStateRequestUpdate $realStateRequest, RealState $realState)
     {
-        $http = new GuzzleHttp\Client;
-        $apiCredentials = session('api_credentials');
-
-        $response = $http->request('PUT', 'http://localhost:8000/api/real_states/' . $realState->id, [
-            'headers' => [
-                'Accept' => 'application/json',
-                'Authorization' => $apiCredentials['token_type'] . ' ' . $apiCredentials['access_token']
-            ],
-            'form_params' => [
-                'name' => $request->name,
-                'description' => $request->description
-            ],
-        ]);
-
-        return json_decode((string) $response->getBody(), true);
+        return $this->realStateService->putRealState($realStateRequest, $realState);
     }
 
     /**
@@ -110,17 +57,7 @@ class RealStatesController extends Controller
      */
     public function show(RealState $realState)
     {
-        $http = new GuzzleHttp\Client;
-        $apiCredentials = session('api_credentials');
-
-        $response = $http->request('GET', 'http://localhost:8000/api/real_states/' . $realState->id, [
-            'headers' => [
-                'Accept' => 'application/json',
-                'Authorization' => $apiCredentials['token_type'] . ' ' . $apiCredentials['access_token']
-            ]
-        ]);
-
-        return json_decode((string) $response->getBody(), true);
+        return $this->realStateService->getRealState($realState);
     }
 
     /**
@@ -129,16 +66,6 @@ class RealStatesController extends Controller
      */
     public function destroy(RealState $realState)
     {
-        $http = new GuzzleHttp\Client;
-        $apiCredentials = session('api_credentials');
-
-        $response = $http->request('DELETE', 'http://localhost:8000/api/real_states/' . $realState->id, [
-            'headers' => [
-                'Accept' => 'application/json',
-                'Authorization' => $apiCredentials['token_type'] . ' ' . $apiCredentials['access_token']
-            ]
-        ]);
-
-        return json_decode((string) $response->getBody(), true);
+        return $this->realStateService->deleteRealState($realState);
     }
 }

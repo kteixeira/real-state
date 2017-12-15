@@ -5,77 +5,42 @@ namespace App\Http\Controllers;
 use App\Http\Requests\PropertyRequestCreate;
 use App\Http\Requests\PropertyRequestUpdate;
 use App\Property;
-use GuzzleHttp;
+use App\Services\Property as PropertyService;
 
 class PropertiesController extends Controller
 {
+    private $propertyService;
+
+    public function __construct()
+    {
+        $this->propertyService = new PropertyService();
+    }
+
     /**
      * @return mixed
      */
     public function index()
     {
-        $http = new GuzzleHttp\Client;
-        $apiCredentials = session('api_credentials');
-
-        $response = $http->request('GET', 'http://localhost:8000/api/properties', [
-            'headers' => [
-                'Accept' => 'application/json',
-                'Authorization' => $apiCredentials['token_type'] . ' ' . $apiCredentials['access_token']
-            ]
-        ]);
-
-        return json_decode((string) $response->getBody(), true);
+        return $this->propertyService->getProperties();
     }
 
     /**
-     * @param PropertyRequestCreate $request
+     * @param PropertyRequestCreate $propertyRequest
      * @return mixed
      */
-    public function store(PropertyRequestCreate $request)
+    public function store(PropertyRequestCreate $propertyRequest)
     {
-        $http = new GuzzleHttp\Client;
-        $apiCredentials = session('api_credentials');
-
-        $response = $http->post('http://localhost:8000/api/properties', [
-            'headers' => [
-                'Accept' => 'application/json',
-                'Authorization' => $apiCredentials['token_type'] . ' ' . $apiCredentials['access_token']
-            ],
-            'form_params' => [
-                'real_states_id' => $request->real_states_id,
-                'type' => $request->type,
-                'description' => $request->description,
-                'address' => $request->address
-            ]
-        ]);
-
-        return json_decode((string) $response->getBody(), true);
+        return $this->propertyService->postProperty($propertyRequest);
     }
 
     /**
-     * @param PropertyRequestUpdate $request
+     * @param PropertyRequestUpdate $propertyRequest
      * @param Property $property
      * @return mixed
      */
-    public function update(PropertyRequestUpdate $request, Property $property)
+    public function update(PropertyRequestUpdate $propertyRequest, Property $property)
     {
-        $http = new GuzzleHttp\Client;
-        $apiCredentials = session('api_credentials');
-
-        $response = $http->request('PUT', 'http://localhost:8000/api/properties/' . $property->id, [
-            'headers' => [
-                'Accept' => 'application/json',
-                'Authorization' => $apiCredentials['token_type'] . ' ' . $apiCredentials['access_token']
-            ],
-            'form_params' => [
-                'real_states_id' => $request->real_states_id,
-                'type' => $request->type,
-                'description' => $request->description,
-                'address' => $request->address
-            ]
-        ]);
-
-        return json_decode((string) $response->getBody(), true);
+        return $this->propertyService->putProperty($propertyRequest, $property);
     }
 
     /**
@@ -84,17 +49,7 @@ class PropertiesController extends Controller
      */
     public function show(Property $property)
     {
-        $http = new GuzzleHttp\Client;
-        $apiCredentials = session('api_credentials');
-
-        $response = $http->request('GET', 'http://localhost:8000/api/properties/' . $property->id, [
-            'headers' => [
-                'Accept' => 'application/json',
-                'Authorization' => $apiCredentials['token_type'] . ' ' . $apiCredentials['access_token']
-            ]
-        ]);
-
-        return json_decode((string) $response->getBody(), true);
+        return $this->propertyService->getProperty($property);
     }
 
     /**
@@ -103,16 +58,6 @@ class PropertiesController extends Controller
      */
     public function destroy(Property $property)
     {
-        $http = new GuzzleHttp\Client;
-        $apiCredentials = session('api_credentials');
-
-        $response = $http->request('DELETE', 'http://localhost:8000/api/properties/' . $property->id, [
-            'headers' => [
-                'Accept' => 'application/json',
-                'Authorization' => $apiCredentials['token_type'] . ' ' . $apiCredentials['access_token']
-            ]
-        ]);
-
-        return json_decode((string) $response->getBody(), true);
+       return $this->propertyService->deleteProperty($property);
     }
 }
